@@ -43,6 +43,11 @@ else
 fi
 
 info "Upgrading OpenClaw release (host=${OPENCLAW_HOST}, issuer=${CLUSTER_ISSUER})"
+# IMPORTANT: do NOT use helm --wait here. helm --wait blocks on the Certificate
+# resource; a slow ACME issuance (e.g. Let's Encrypt waiting on DNS) would mark
+# the release "failed", and a later `helm upgrade --reuse-values` would then
+# silently reuse values from the last *successful* revision — reverting host/
+# issuer. We wait for the Deployment and the cert explicitly instead.
 helmc upgrade "${OPENCLAW_RELEASE}" "${REPO_ROOT}/charts/openclaw" \
   --namespace "${OPENCLAW_NAMESPACE}" \
   --reuse-values \
@@ -50,7 +55,10 @@ helmc upgrade "${OPENCLAW_RELEASE}" "${REPO_ROOT}/charts/openclaw" \
   --set expose.host="${OPENCLAW_HOST}" \
   --set expose.tls.enabled=true \
   --set expose.tls.clusterIssuer="${CLUSTER_ISSUER}" \
-  --wait --timeout 5m
+  --wait=false
+
+info "Waiting for the OpenClaw rollout"
+kc -n "${OPENCLAW_NAMESPACE}" rollout status deploy/"${OPENCLAW_RELEASE}" --timeout=180s
 
 info "Waiting for the leaf certificate to be issued"
 if kc -n "${OPENCLAW_NAMESPACE}" wait --for=condition=Ready \
