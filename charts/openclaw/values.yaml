@@ -15,12 +15,15 @@ replicaCount: 1
 openclaw:
   # Model is "<provider>/<model-id>". Point this at any provider OpenClaw supports.
   # Set a valid model id for your account before relying on agent responses.
-  model: "anthropic/claude-sonnet-4-5"
+  model: "anthropic/claude-sonnet-4-6"
   # The gateway listens on this port for the Control UI / API.
   port: 18789
-  # Start args passed to `openclaw gateway run`. --allow-unconfigured lets the
-  # gateway boot in a container without the interactive onboarding flow.
-  allowUnconfigured: true
+  # Gateway run mode. "local" is required when not using --allow-unconfigured.
+  mode: local
+  # Bind mode: loopback | lan | tailnet | auto | custom.
+  # "lan" binds all interfaces (0.0.0.0) so the in-cluster Service can reach it.
+  # "loopback" (the default) is NOT reachable from the Service.
+  bind: lan
   extraArgs: []
   # Extra environment variables (name/value) injected into the container.
   extraEnv: []

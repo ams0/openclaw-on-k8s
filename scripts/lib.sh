@@ -12,7 +12,7 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 : "${CERT_MANAGER_NAMESPACE:=cert-manager}"
 : "${ENVOY_NAMESPACE:=envoy-gateway-system}"
 : "${OPENCLAW_RELEASE:=openclaw}"
-: "${OPENCLAW_MODEL:=anthropic/claude-sonnet-4-5}"
+: "${OPENCLAW_MODEL:=anthropic/claude-sonnet-4-6}"
 : "${CERT_MANAGER_VERSION:=v1.16.2}"
 
 # Load .env if present (KEY=VALUE lines), without clobbering already-set vars.
@@ -44,10 +44,11 @@ ensure_ns() {
   kc get namespace "$1" >/dev/null 2>&1 || kc create namespace "$1"
 }
 
-# Fetch the external IP of the Envoy LB Service backing a Gateway. Empty until set.
+# Fetch the public address of a Gateway from its status. Envoy Gateway publishes
+# the LoadBalancer IP here regardless of which namespace the proxy Service lives
+# in, so this is more robust than querying the Service directly. Empty until set.
 gateway_lb_ip() {
   local ns="$1" gw="$2"
-  kc -n "$ns" get svc \
-    -l "gateway.envoyproxy.io/owning-gateway-name=${gw}" \
-    -o jsonpath='{.items[0].status.loadBalancer.ingress[0].ip}' 2>/dev/null || true
+  kc -n "$ns" get gateway "$gw" \
+    -o jsonpath='{.status.addresses[0].value}' 2>/dev/null || true
 }

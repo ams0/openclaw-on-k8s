@@ -2,25 +2,36 @@
 # the "default-model-config" ModelConfig created by the kagent Helm chart (which we
 # install with the Anthropic provider).
 #
-# CRD group/version confirmed against kagent-dev/kagent (kagent.dev/v1alpha2).
+# Schema confirmed against kagent 0.9.9 (kagent.dev/v1alpha2): the agent body lives
+# under spec.declarative. Tools are provided by the chart's bundled
+# RemoteMCPServer "kagent-tool-server"; we wire a read-only subset here.
 apiVersion: kagent.dev/v1alpha2
 kind: Agent
 metadata:
   name: k8s-helper
   namespace: kagent
 spec:
-  # Agent framework: ADK | LangGraph | CrewAI
-  framework: ADK
-  # References the ModelConfig the chart creates for the default provider.
-  modelConfigName: default-model-config
-  card:
-    name: k8s-helper
-    description: Read-only Kubernetes troubleshooting assistant for the openclaw-k8s demo.
-  config:
+  description: Read-only Kubernetes troubleshooting assistant for the openclaw-k8s demo.
+  declarative:
+    modelConfig: default-model-config
     systemMessage: |
       You are a helpful, careful Kubernetes site-reliability assistant running on
       the openclaw-k8s demo cluster. Help users understand the state of workloads,
-      explain Kubernetes and Gateway API concepts, and suggest read-only kubectl
-      commands to investigate issues. Never recommend destructive actions without
-      clearly flagging them first.
-    temperature: 0.2
+      explain Kubernetes and Gateway API concepts, and investigate issues using the
+      read-only tools available to you (listing/describing resources, reading pod
+      logs and events). Never recommend destructive actions without clearly flagging
+      them first, and prefer read-only investigation before suggesting any change.
+    tools:
+      - type: McpServer
+        mcpServer:
+          apiGroup: kagent.dev
+          kind: RemoteMCPServer
+          name: kagent-tool-server
+          toolNames:
+            - k8s_get_resources
+            - k8s_get_resource_yaml
+            - k8s_describe_resource
+            - k8s_get_events
+            - k8s_get_pod_logs
+            - k8s_get_available_api_resources
+            - k8s_get_cluster_configuration

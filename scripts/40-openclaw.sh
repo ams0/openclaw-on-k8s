@@ -12,7 +12,12 @@ TOKEN_FILE="${REPO_ROOT}/.openclaw-gateway-token"
 if [[ -f "${TOKEN_FILE}" ]]; then
   GATEWAY_TOKEN="$(cat "${TOKEN_FILE}")"
 else
-  GATEWAY_TOKEN="$(LC_ALL=C tr -dc 'a-z0-9' </dev/urandom | head -c 40)"
+  # openssl avoids the `tr </dev/urandom | head` SIGPIPE trap under pipefail.
+  if command -v openssl >/dev/null 2>&1; then
+    GATEWAY_TOKEN="$(openssl rand -hex 20)"
+  else
+    GATEWAY_TOKEN="$(LC_ALL=C tr -dc 'a-z0-9' </dev/urandom 2>/dev/null | dd bs=1 count=40 2>/dev/null)"
+  fi
   printf '%s' "${GATEWAY_TOKEN}" > "${TOKEN_FILE}"
   chmod 600 "${TOKEN_FILE}"
 fi

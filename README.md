@@ -116,11 +116,17 @@ make teardown ARGS="--keep-cert-manager"
 
 ## Caveats (read before relying on this)
 
-- **OpenClaw container contract is best-effort.** The image
-  (`ghcr.io/openclaw/openclaw`), port (`18789`), and start command
-  (`openclaw gateway run --port 18789 --allow-unconfigured`) come from the
-  OpenClaw docs. If a release changes flags or the bind address, adjust
-  `charts/openclaw/templates/deployment.yaml` and `values.yaml` accordingly.
+- **OpenClaw container contract — verified on image `2026.6.10`.** Two
+  non-obvious requirements, both baked into the chart:
+  - The gateway defaults to **loopback** bind and is then unreachable from the
+    Service. The chart sets `gateway.bind: lan` + `gateway.mode: local` (in
+    `openclaw.json`) so it listens on `0.0.0.0`. Do **not** pass
+    `--allow-unconfigured` — that flag forces the loopback fallback.
+  - `openclaw.json` uses `agents.defaults.model.primary` (not `agent.model`),
+    and the browser Control UI needs the external origin in
+    `gateway.controlUi.allowedOrigins` (the chart templates this from
+    `expose.host`). If a future release changes the schema, update
+    `charts/openclaw/templates/configmap.yaml`.
 - **Self-signed TLS + nip.io** are for demos. For real certs, use the Let's
   Encrypt issuer with a hostname that actually resolves to the Gateway IP.
 - **Secrets are passed via `--set`** at install time and never written to git.

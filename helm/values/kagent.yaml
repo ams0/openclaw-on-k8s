@@ -11,7 +11,5 @@ providers:
     # ModelConfig that sample agents reference by name.
     model: claude-sonnet-4-5
 
-# Keep the bundled UI; reach it via:
+# The bundled UI is installed by default; reach it via:
 #   kubectl -n kagent port-forward svc/kagent-ui 8080:8080
-ui:
-  enabled: true

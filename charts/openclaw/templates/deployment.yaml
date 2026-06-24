@@ -26,6 +26,24 @@ spec:
       serviceAccountName: {{ include "openclaw.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      initContainers:
+        # Seed the (writable) data volume with openclaw.json from the ConfigMap.
+        # We copy rather than subPath-mount so the gateway can rewrite its own
+        # config at runtime without hitting a read-only file.
+        - name: seed-config
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          command:
+            - sh
+            - -c
+            - 'mkdir -p /home/node/.openclaw && cp -f /config/openclaw.json /home/node/.openclaw/openclaw.json'
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            - name: data
+              mountPath: /home/node/.openclaw
       containers:
         - name: openclaw
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -36,9 +54,6 @@ spec:
           args:
             - "--port"
             - {{ .Values.openclaw.port | quote }}
-            {{- if .Values.openclaw.allowUnconfigured }}
-            - "--allow-unconfigured"
-            {{- end }}
             {{- with .Values.openclaw.extraArgs }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
@@ -79,9 +94,6 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /home/node/.openclaw
-            - name: config
-              mountPath: /home/node/.openclaw/openclaw.json
-              subPath: openclaw.json
       volumes:
         - name: config
           configMap:

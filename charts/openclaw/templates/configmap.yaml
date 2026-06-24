@@ -5,17 +5,32 @@ metadata:
   labels:
     {{- include "openclaw.labels" . | nindent 4 }}
 data:
-  # Mounted at /home/node/.openclaw/openclaw.json. The Anthropic API key is read
-  # from the ANTHROPIC_API_KEY env var (injected from the Secret), so no secret
-  # material lives in this ConfigMap.
+  # Seeded into the PVC at /home/node/.openclaw/openclaw.json by an initContainer.
+  # The Anthropic API key and gateway token come from env (the Secret), so no
+  # secret material lives here.
+  #   gateway.mode=local + gateway.bind=lan makes the gateway listen on all
+  #   interfaces (0.0.0.0) so the Service/Gateway can reach it. (The default
+  #   "loopback" bind, or running with --allow-unconfigured, is not reachable
+  #   in-cluster.)
   openclaw.json: |
     {
-      "agent": {
-        "model": {{ .Values.openclaw.model | quote }}
+      "agents": {
+        "defaults": {
+          "model": { "primary": {{ .Values.openclaw.model | quote }} },
+          "models": { {{ .Values.openclaw.model | quote }}: { "alias": "default" } }
+        }
       },
       "gateway": {
+        "mode": {{ .Values.openclaw.mode | quote }},
+        "bind": {{ .Values.openclaw.bind | quote }},
         "controlUi": {
-          "enabled": true
+          "allowedOrigins": [
+            {{- if .Values.expose.host }}
+            "https://{{ .Values.expose.host }}",
+            {{- end }}
+            "http://localhost:{{ .Values.openclaw.port }}",
+            "http://127.0.0.1:{{ .Values.openclaw.port }}"
+          ]
         }
       }
     }
