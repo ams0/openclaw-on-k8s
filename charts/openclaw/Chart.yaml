@@ -1,0 +1,17 @@
+apiVersion: v2
+name: openclaw
+description: OpenClaw — self-hosted personal AI assistant gateway, packaged for Kubernetes
+type: application
+version: 0.1.0
+# Image tag default; overridable via values.image.tag
+appVersion: "latest"
+home: https://openclaw.ai
+sources:
+  - https://github.com/openclaw/openclaw
+keywords:
+  - ai
+  - assistant
+  - gateway
+  - openclaw
+maintainers:
+  - name: openclaw-k8s demo

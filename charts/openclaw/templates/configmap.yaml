@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "openclaw.fullname" . }}-config
+  labels:
+    {{- include "openclaw.labels" . | nindent 4 }}
+data:
+  # Mounted at /home/node/.openclaw/openclaw.json. The Anthropic API key is read
+  # from the ANTHROPIC_API_KEY env var (injected from the Secret), so no secret
+  # material lives in this ConfigMap.
+  openclaw.json: |
+    {
+      "agent": {
+        "model": {{ .Values.openclaw.model | quote }}
+      },
+      "gateway": {
+        "controlUi": {
+          "enabled": true
+        }
+      }
+    }

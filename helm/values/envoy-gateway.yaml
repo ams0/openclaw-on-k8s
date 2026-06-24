@@ -1,0 +1,14 @@
+# Values for envoyproxy/gateway-helm (Envoy Gateway).
+# Envoy Gateway ships the Gateway API CRDs (standard channel) by default, so no
+# separate Gateway API install step is required.
+
+deployment:
+  replicas: 1
+  envoyGateway:
+    resources:
+      requests:
+        cpu: 25m
+        memory: 128Mi
+
+# Default EnvoyProxy provisioning is fine for AKS; each Gateway gets a Service of
+# type LoadBalancer, which AKS backs with a public IP automatically.

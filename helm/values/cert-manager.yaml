@@ -1,0 +1,23 @@
+# Values for jetstack/cert-manager.
+# CRDs are installed by the chart itself so the demo stays single-command.
+crds:
+  enabled: true
+  keep: true
+
+# Modest footprint for a demo cluster.
+resources:
+  requests:
+    cpu: 10m
+    memory: 64Mi
+
+webhook:
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+
+cainjector:
+  resources:
+    requests:
+      cpu: 10m
+      memory: 64Mi

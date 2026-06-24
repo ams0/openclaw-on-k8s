@@ -1,0 +1,20 @@
+OpenClaw has been deployed as release "{{ .Release.Name }}" in namespace "{{ .Release.Namespace }}".
+
+1. Watch the rollout:
+   kubectl -n {{ .Release.Namespace }} rollout status deploy/{{ include "openclaw.fullname" . }}
+
+2. Reach the Control UI locally (no Gateway needed):
+   kubectl -n {{ .Release.Namespace }} port-forward svc/{{ include "openclaw.fullname" . }} {{ .Values.service.port }}:{{ .Values.service.port }}
+   open http://127.0.0.1:{{ .Values.service.port }}/
+
+{{- if .Values.expose.enabled }}
+
+3. Public URL (via Envoy Gateway):
+   https://{{ .Values.expose.host }}/
+{{- else }}
+
+3. Not yet exposed externally. Run scripts/50-expose.sh to publish it through the Gateway.
+{{- end }}
+
+Gateway token (for the Control UI login) is stored in Secret "{{ include "openclaw.secretName" . }}", key OPENCLAW_GATEWAY_TOKEN:
+   kubectl -n {{ .Release.Namespace }} get secret {{ include "openclaw.secretName" . }} -o jsonpath='{.data.OPENCLAW_GATEWAY_TOKEN}' | base64 -d; echo

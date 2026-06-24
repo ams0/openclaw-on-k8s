@@ -1,0 +1,17 @@
+# Values for the kagent chart (oci://ghcr.io/kagent-dev/kagent/helm/kagent).
+#
+# The provider API key is NOT stored here. The install script passes it with
+# --set providers.anthropic.apiKey=$ANTHROPIC_API_KEY at install time.
+
+providers:
+  # Use Anthropic (Claude) as the default LLM provider for agents.
+  default: anthropic
+  anthropic:
+    # model can be overridden; the chart creates a "default-model-config"
+    # ModelConfig that sample agents reference by name.
+    model: claude-sonnet-4-5
+
+# Keep the bundled UI; reach it via:
+#   kubectl -n kagent port-forward svc/kagent-ui 8080:8080
+ui:
+  enabled: true

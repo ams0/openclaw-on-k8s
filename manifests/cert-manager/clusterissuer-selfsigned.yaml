@@ -1,0 +1,38 @@
+# A small self-signed PKI for the demo:
+#   selfsigned-issuer  ->  signs a CA cert (openclaw-ca)  ->  openclaw-ca-issuer
+# Leaf certificates (e.g. the OpenClaw host cert) are then signed by the CA issuer,
+# so every demo cert chains to one CA you could choose to trust on your machine.
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: selfsigned-issuer
+spec:
+  selfSigned: {}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: openclaw-ca
+  # Lives in cert-manager's cluster-resource namespace so the CA ClusterIssuer
+  # can read the resulting key pair.
+  namespace: cert-manager
+spec:
+  isCA: true
+  commonName: openclaw-k8s-demo-ca
+  secretName: openclaw-ca-key-pair
+  duration: 87600h   # 10 years
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+  issuerRef:
+    name: selfsigned-issuer
+    kind: ClusterIssuer
+    group: cert-manager.io
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: openclaw-ca-issuer
+spec:
+  ca:
+    secretName: openclaw-ca-key-pair

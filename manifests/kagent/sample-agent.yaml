@@ -1,0 +1,26 @@
+# A minimal kagent sample agent: a Kubernetes troubleshooting assistant that uses
+# the "default-model-config" ModelConfig created by the kagent Helm chart (which we
+# install with the Anthropic provider).
+#
+# CRD group/version confirmed against kagent-dev/kagent (kagent.dev/v1alpha2).
+apiVersion: kagent.dev/v1alpha2
+kind: Agent
+metadata:
+  name: k8s-helper
+  namespace: kagent
+spec:
+  # Agent framework: ADK | LangGraph | CrewAI
+  framework: ADK
+  # References the ModelConfig the chart creates for the default provider.
+  modelConfigName: default-model-config
+  card:
+    name: k8s-helper
+    description: Read-only Kubernetes troubleshooting assistant for the openclaw-k8s demo.
+  config:
+    systemMessage: |
+      You are a helpful, careful Kubernetes site-reliability assistant running on
+      the openclaw-k8s demo cluster. Help users understand the state of workloads,
+      explain Kubernetes and Gateway API concepts, and suggest read-only kubectl
+      commands to investigate issues. Never recommend destructive actions without
+      clearly flagging them first.
+    temperature: 0.2

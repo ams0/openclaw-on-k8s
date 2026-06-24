@@ -1,0 +1,17 @@
+{{- if and .Values.expose.enabled .Values.expose.tls.enabled -}}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ include "openclaw.fullname" . }}-tls
+  labels:
+    {{- include "openclaw.labels" . | nindent 4 }}
+spec:
+  # cert-manager writes the keypair here; the Gateway HTTPS listener references it.
+  secretName: {{ .Values.expose.tls.secretName }}
+  dnsNames:
+    - {{ required "expose.host is required for TLS" .Values.expose.host | quote }}
+  issuerRef:
+    name: {{ .Values.expose.tls.clusterIssuer }}
+    kind: ClusterIssuer
+    group: cert-manager.io
+{{- end }}

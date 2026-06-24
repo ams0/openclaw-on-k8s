@@ -1,0 +1,23 @@
+# OPTIONAL: publicly-trusted certificates via Let's Encrypt, solved over the
+# Gateway API (HTTP-01). Apply this instead of the self-signed issuer only when
+# the OpenClaw host is a real DNS name that resolves to the Gateway's public IP
+# (nip.io hostnames will NOT pass ACME validation reliably).
+#
+# Then set expose.tls.clusterIssuer=letsencrypt-prod for the openclaw release.
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: alessandro@stackmasters.com   # change to a real contact address
+    privateKeySecretRef:
+      name: letsencrypt-prod-account-key
+    solvers:
+      - http01:
+          gatewayHTTPRoute:
+            parentRefs:
+              - name: openclaw-gateway
+                namespace: openclaw
+                kind: Gateway

@@ -1,0 +1,8 @@
+# Binds the "envoy" GatewayClass to the Envoy Gateway controller installed in
+# the envoy-gateway-system namespace.
+apiVersion: gateway.networking.k8s.io/v1
+kind: GatewayClass
+metadata:
+  name: envoy
+spec:
+  controllerName: gateway.envoyproxy.io/gatewayclass-controller
