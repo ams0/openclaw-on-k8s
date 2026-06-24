@@ -7,7 +7,10 @@ crds:
 # Enable Gateway API support so cert-manager can solve ACME HTTP-01 challenges
 # over the Gateway (used by the optional Let's Encrypt ClusterIssuer). Required
 # for solvers.http01.gatewayHTTPRoute.
-featureGates: "ExperimentalGatewayAPISupport=true"
+# NOTE: as of cert-manager v1.16 this is config.enableGatewayAPI, NOT the old
+# --feature-gates=ExperimentalGatewayAPISupport (deprecated/removed).
+config:
+  enableGatewayAPI: true
 
 # Modest footprint for a demo cluster.
 resources:

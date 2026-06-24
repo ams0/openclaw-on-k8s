@@ -120,8 +120,9 @@ use your own domain with a publicly-trusted certificate:
    ```bash
    kubectl apply -f manifests/cert-manager/clusterissuer-letsencrypt.yaml
    ```
-   This requires cert-manager's `ExperimentalGatewayAPISupport` feature gate, which
-   `helm/values/cert-manager.yaml` enables.
+   This requires cert-manager's Gateway API support (`config.enableGatewayAPI: true`
+   in `helm/values/cert-manager.yaml`; on v1.16+ this replaced the old
+   `ExperimentalGatewayAPISupport` feature gate).
 3. **Re-run expose with your host + issuer:**
    ```bash
    CUSTOM_HOST=claw.example.com CLUSTER_ISSUER=letsencrypt-prod ./scripts/50-expose.sh
