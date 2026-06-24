@@ -14,6 +14,14 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 : "${OPENCLAW_RELEASE:=openclaw}"
 : "${OPENCLAW_MODEL:=anthropic/claude-sonnet-4-6}"
 : "${CERT_MANAGER_VERSION:=v1.16.2}"
+# Custom public hostname for OpenClaw. When empty, scripts/50-expose.sh derives a
+# nip.io host from the Gateway LB IP. Set this to a real DNS name (A record ->
+# Gateway IP) to use your own domain, e.g. CUSTOM_HOST=claw.example.com
+: "${CUSTOM_HOST:=}"
+# cert-manager ClusterIssuer for the OpenClaw TLS cert. Use "letsencrypt-prod"
+# (publicly trusted) once CUSTOM_HOST resolves to the Gateway IP, or the default
+# self-signed CA issuer for demo/nip.io hosts.
+: "${CLUSTER_ISSUER:=openclaw-ca-issuer}"
 
 # Load .env if present (KEY=VALUE lines), without clobbering already-set vars.
 if [[ -f "${REPO_ROOT}/.env" ]]; then

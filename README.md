@@ -106,6 +106,40 @@ Tune via `.env` (see `.env.example`) or `--set` on the chart:
 | Persistence | `persistence.size` | `2Gi` |
 | TLS issuer | `expose.tls.clusterIssuer` | `openclaw-ca-issuer` |
 
+## Custom domain + trusted TLS (Let's Encrypt)
+
+By default OpenClaw is published on a `*.nip.io` host with a self-signed cert. To
+use your own domain with a publicly-trusted certificate:
+
+1. **Point DNS at the Gateway.** Get the Gateway's public IP and create an A record:
+   ```bash
+   kubectl -n openclaw get gateway openclaw-gateway -o jsonpath='{.status.addresses[0].value}'
+   # claw.example.com.  A  <that-ip>
+   ```
+2. **Apply the Let's Encrypt issuer** (edit the contact email first):
+   ```bash
+   kubectl apply -f manifests/cert-manager/clusterissuer-letsencrypt.yaml
+   ```
+   This requires cert-manager's `ExperimentalGatewayAPISupport` feature gate, which
+   `helm/values/cert-manager.yaml` enables.
+3. **Re-run expose with your host + issuer:**
+   ```bash
+   CUSTOM_HOST=claw.example.com CLUSTER_ISSUER=letsencrypt-prod ./scripts/50-expose.sh
+   ```
+   The cert validates over HTTP-01 through the Gateway and issues automatically once
+   DNS resolves to the Gateway IP. Until then it stays `Pending` (cert-manager's
+   self-check gates ACME validation, so this does not burn Let's Encrypt rate limits).
+
+## Troubleshooting
+
+- **cert-manager `helm upgrade` fails with a `ValidatingWebhookConfiguration`
+  conflict** (`conflict with "admissionsenforcer" ... .webhooks[...].namespaceSelector`).
+  On AKS with the Azure Policy add-on, an admission enforcer takes ownership of the
+  cert-manager webhook's `namespaceSelector`, so a later helm *upgrade* conflicts on
+  that field. A fresh `make install` is unaffected (the field isn't contended at
+  install time). cert-manager still functions; if you must upgrade, re-apply with
+  `helm upgrade --force` or temporarily exclude cert-manager from Azure Policy.
+
 ## Teardown
 
 ```bash
