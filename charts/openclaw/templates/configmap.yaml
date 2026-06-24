@@ -24,6 +24,7 @@ data:
         "mode": {{ .Values.openclaw.mode | quote }},
         "bind": {{ .Values.openclaw.bind | quote }},
         "controlUi": {
+          "dangerouslyDisableDeviceAuth": {{ .Values.openclaw.disableDeviceAuth }},
           "allowedOrigins": [
             {{- if .Values.expose.host }}
             "https://{{ .Values.expose.host }}",

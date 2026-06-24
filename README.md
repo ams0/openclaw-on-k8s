@@ -69,6 +69,12 @@ The Control UI login token:
 cat .openclaw-gateway-token
 ```
 
+> **Device pairing:** by default the chart sets
+> `openclaw.disableDeviceAuth: true`, so the token alone grants Control UI access
+> (no per-browser `openclaw devices approve`). For a real deployment set it to
+> `false` and approve devices explicitly on the Gateway host:
+> `kubectl -n openclaw exec deploy/openclaw -- openclaw devices list|approve <id>`.
+
 **OpenClaw (local, no Gateway):**
 ```bash
 kubectl -n openclaw port-forward svc/openclaw 18789:18789

@@ -24,6 +24,11 @@ openclaw:
   # "lan" binds all interfaces (0.0.0.0) so the in-cluster Service can reach it.
   # "loopback" (the default) is NOT reachable from the Service.
   bind: lan
+  # Demo convenience: skip the Control UI device-pairing approval so the gateway
+  # token alone grants browser access (no per-browser `openclaw devices approve`).
+  # The UI is still token-protected. Leave true for a smooth demo; set false to
+  # require explicit device approval (more secure for real/long-lived deployments).
+  disableDeviceAuth: true
   extraArgs: []
   # Extra environment variables (name/value) injected into the container.
   extraEnv: []
